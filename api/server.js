@@ -37,4 +37,27 @@ server.get("/api/posts/:id", (req, res) => {
     });
 });
 
+server.post("/api/posts", (req, res) => {
+  const newPost = req.body;
+  !newPost.title || !newPost.contents
+    ? res.status(400).json({
+        message: "Please provide title and contents for the post",
+      })
+    : Post.insert(newPost)
+        .then(({ id }) => {
+          return Post.findById(id);
+        })
+        .then((posts) => {
+          res.status(201).json(posts);
+        })
+        .catch((error) => {
+          console.log(error);
+          res.status(500).json({
+            message: "There was an error while saving the post to the database",
+            error: error.message,
+            stack: error.stack,
+          });
+        });
+});
+
 module.exports = server;
